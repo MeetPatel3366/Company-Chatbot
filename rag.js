@@ -11,3 +11,8 @@
  * 2. Add retrieval step
  * 3. Pass input + relevant information to LLM
  */
+
+import { indexTheDocument } from "./prepare.js";
+
+const filePath = "./ABC-PVT-LTD.pdf";
+indexTheDocument(filePath);
