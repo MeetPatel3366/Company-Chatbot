@@ -62,6 +62,10 @@ export async function chat() {
       role: "assistant",
       content: answer,
     });
+
+    if (messages.length > 20) {
+      messages.splice(1, 2);
+    }
   }
 
   rl.close();
