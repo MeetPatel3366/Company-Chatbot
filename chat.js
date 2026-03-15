@@ -4,6 +4,15 @@ import { vectorStore } from "./prepare.js";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+const SYSTEM_PROMPT = `You are an assistant for question-asnwering tasks. Use the follwing relevant pieces of retrieved context to answer the question. If you don't know the answer, say I don't know`;
+
+const messages = [
+  {
+    role: "system",
+    content: SYSTEM_PROMPT,
+  },
+];
+
 export async function chat() {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -26,27 +35,33 @@ export async function chat() {
       .join("\n\n");
     console.log("context: ", context);
 
-    const SYSTEM_PROMPT = `You are an assistant for question-asnwering tasks. Use the follwing relevant pieces of retrieved context to answer the question. If you don't know the answer, say I don't know`;
-
     const userQuery = `Question: ${question}
     Relevant context: ${context}
     Answer:`;
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPT,
-        },
+        ...messages,
         {
           role: "user",
-          content: userQuery
+          content: userQuery,
         },
       ],
       model: "openai/gpt-oss-20b",
     });
 
-    console.log(`Assistant: `,chatCompletion.choices[0]?.message?.content || "");
+    const answer = chatCompletion.choices[0]?.message?.content || "";
+    console.log(`Assistant: `, answer);
+
+    messages.push({
+      role: "user",
+      content: question,
+    });
+
+    messages.push({
+      role: "assistant",
+      content: answer,
+    });
   }
 
   rl.close();
